@@ -1,0 +1,150 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="30">
+
+    <title>Wenco</title>
+    <link rel="stylesheet" href="~/css/style.css">
+</head>
+<body>
+
+    @*<table id="Opertable">
+            <tr>
+                <th>Наряд на ПО:</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+
+            <tr>
+                <th></th>
+                <th>Место работы</th>
+                <th>Наряд</th>
+                <th>План по наряду</th>
+                <th>Ед. изм.</th>
+            </tr>
+
+            @if (Model.List != null)
+            {
+                @foreach (var element in Model.List.Where(x => x.Tag == "тут название тэга"))
+                {
+
+                    <tr>
+                        <td>@element.k1_A</td>
+                        <td>@element.k2_B</td>
+                        <td>@element.k3_D</td>
+                        <td>@element.k4_E</td>
+                        <td>@element.x0_C</td>
+                    </tr>
+                }
+            }
+
+            else
+            {
+                @Model.Error
+            }
+
+            <tr>
+                <th>Наряд на АС:</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+
+            <tr>
+                <th></th>
+                <th>Место работы</th>
+                <th>Наряд</th>
+                <th>План по наряду</th>
+                <th>Ед. изм.</th>
+            </tr>
+
+            @if (Model.List != null)
+            {
+                @foreach (var element in Model.List.Where(x => x.Tag == "тут название следующего тэга"))
+                {
+                    <tr>
+                        <td>@element.k1_A</td>
+                        <td>@element.k2_B</td>
+                        <td>@element.k3_D</td>
+                        <td>@element.k4_E</td>
+                        <td>@element.x0_C</td>
+                    </tr>
+                }
+            }
+
+            <tr>
+                <th>Другие наряды:</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+
+            <tr>
+                <th></th>
+                <th>Место работы</th>
+                <th>Наряд</th>
+                <th>План по наряду</th>
+                <th>Ед. изм.</th>
+            </tr>
+            @if (Model.List != null)
+            {
+                @foreach (var element in Model.List.Where(x => x.Tag != "название первого тэга" && x.Tag != "Название второго тэга" ))
+                {
+                    <tr>
+                        <td>@element.k1_A</td>
+                        <td>@element.k2_B</td>
+                        <td>@element.k3_D</td>
+                        <td>@element.k4_E</td>
+                        <td>@element.x0_C</td>
+                    </tr>
+                }
+            }
+
+        </table>*@
+
+    @if (!string.IsNullOrEmpty(Model.SideNumber))
+    { 
+    <table id="Opertable">
+
+        <tr>
+            <th>Машина</th>
+            <th>Место работы</th>
+            <th>Уже выполнено</th>
+            <th>План по наряду</th>
+            <th>Ед. изм.</th>
+
+        </tr>
+        <tr>
+            <td>@Model.SideNumber</td>
+            <td>@Model.Workplace</td>
+            <td>@Model.Progress</td>
+            <td>@Model.Plan</td>
+            <td>@Model.Unit</td>
+        </tr>
+    </table>
+    }
+			else
+			{
+                <div>Данные не найдены</div>
+			}
+ 
+
+    <div align=right><a href="#" class="button15" tabindex="0">@Model.IPMessage</a></div>
+</body>
+</html>
+
+
+
+
+
