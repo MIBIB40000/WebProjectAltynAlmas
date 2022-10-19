@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="XML\" />
     <Folder Include="Logs\" />
   </ItemGroup>
 

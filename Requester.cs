@@ -1,97 +1,105 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Net;
 using System.IO;
 using Newtonsoft.Json;
-using System.Data;
-using System.Data.SqlClient;
 
 namespace WebIP
 {
-	public class Requester
+	/// <summary>
+	/// Класс для получения данных со стороны API
+	/// </summary>
+	public static class Requester
 	{
-		public List<string> CreateRequest(string A)
+		public static List<string> CreateRequest(string sideNumber)
 		{
-			string localTime = DateTime.Now.ToString("dd.MM.yyyy");
-			String responseString;
-
-			List<string> showMeData = new List<string>();
-			string shift = DefineShift();
-
 			try
 			{
-				WebRequest request = WebRequest.Create(
-					"http://172.17.32.14:88/gate/getOrders/?shift=" + shift + "&date_in=" + localTime + "&district=3&tip=1");
-				WebResponse response = request.GetResponse();
+				var responseString = GetDataFromApi();
 
-				using (Stream stream = response.GetResponseStream())
+				var trucksDataset = JsonConvert.DeserializeObject<List<TruckData>>(responseString);
+				FilterTruckData(trucksDataset, sideNumber);
+
+				if (trucksDataset == null)
 				{
-					StreamReader reader = new StreamReader(stream);
-					responseString = reader.ReadToEnd();
+					throw new WebException("Data not found");
 				}
 
-				List<ApiData> apis = JsonConvert.DeserializeObject<List<ApiData>>(responseString);
-
-				response.Close();
-				GetTruckFromAPIData(apis);
-
-				if (apis != null)
+				foreach (var truckData in trucksDataset)
 				{
-					foreach (var n in apis)
+					var receivedData = new List<string>
 					{
-						if ("CAT"+n.SideNumber == A)
-						{
-							showMeData.Add("CAT" + n.SideNumber);
-							showMeData.Add(n.Plan);
-							showMeData.Add(n.Workplace);
-							showMeData.Add(n.Unit);
-							return showMeData;
-						}
-					}
-				}
-				else
-				{
-					return null;
+						"CAT" + truckData.SideNumber,
+						truckData.Plan,
+						truckData.Workplace,
+						truckData.Unit
+					};
+
+					return receivedData;
 				}
 			}
 			catch (WebException e)
 			{
 				Console.WriteLine(e);
-				return null;
 			}
+			
 			return null;
 		}
-	//}
 
-		public List<ApiData> GetTruckFromAPIData(List<ApiData> x)
+		private static string GetDataFromApi()
 		{
-			for (int i = x.Count - 1; i >= 0; i--)
-			{
+			var shift = GetShift();
+			var currentTime = DateTime.Now.ToString("dd.MM.yyyy");
+			var requestString = CreateRequestString(shift, currentTime);
 
-				if (x[i].Equip.Contains("Самосвал") is false)
-				{
-					x.RemoveAt(i);
-				}
+			var request = WebRequest.Create(requestString);
+			var response = request.GetResponse();
+
+			string responseString;
+
+			using (var stream = response.GetResponseStream())
+			{
+				var reader = new StreamReader(stream);
+				responseString = reader.ReadToEnd();
 			}
-			return x;
+
+			response.Close();
+			
+			return responseString;
 		}
 
-		public string DefineShift()
+		private static string GetShift()
 		{
-			TimeSpan start = new TimeSpan(19, 30, 0); //здесь задаются временные границы смены
-			TimeSpan end = new TimeSpan(7, 30, 0);
-			TimeSpan now = DateTime.Now.TimeOfDay;
+			var start = new TimeSpan(19, 30, 0); //здесь задаются временные границы смены
+			var end = new TimeSpan(7, 30, 0);
+			var now = DateTime.Now.TimeOfDay;
 
-			if ((now > start) && (now < end))
+			if (now > start && now < end)
 			{
 				return "1";
 			}
-			else
+
+			return "2";
+		}
+
+		private static void FilterTruckData(List<TruckData> data, string sideNumber)
+		{
+			data.RemoveAll(truckData => !IsTruck(truckData) || IsRequiredNumber(truckData));
+
+			bool IsTruck(TruckData truckData)
 			{
-				return "2";
+				return truckData.Equip.Contains("Самосвал");
 			}
-		}		
+
+			bool IsRequiredNumber(TruckData truckData)
+			{
+				return "CAT" + truckData.SideNumber != sideNumber;
+			}
+		}
+
+		private static string CreateRequestString(string shift, string currentTime)
+		{
+			return $"http://172.17.32.14:88/gate/getOrders/?shift={shift}&date_in={currentTime}&district=3&tip=1";
+		}
 	}
 }
